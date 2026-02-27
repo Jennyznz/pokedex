@@ -42,8 +42,13 @@ var commands = map[string]cliCommand {
 	},
 	"map": {
 		name: "map",
-		description: "Displays (20) location areas in the Pokemon world",
+		description: "Displays 20 location areas in the Pokemon world. Consecutive calls display next 20 location areas.",
 		callback: commandMap,
+	},
+	"mapb":  {
+		name: "mapb",
+		description: "Displays previous 20 location areas",
+		callback: commandMapB,
 	},
 }
 
@@ -87,6 +92,7 @@ func commandMap(c *config) error {
 	if err != nil {
 		return fmt.Errorf("Failed to get data from PokeAPI")
 	}
+
 	body, err := io.ReadAll(res.Body)
 	defer res.Body.Close()
 	if res.StatusCode > 299 {
@@ -98,7 +104,7 @@ func commandMap(c *config) error {
 
 	var data locationArea
 	if err := json.Unmarshal(body, &data); err != nil {
-		return err
+		return fmt.Errorf("Failed to unload JSON data")
 	}
 
 	for _, area := range data.Results {
@@ -120,8 +126,51 @@ func commandMap(c *config) error {
 	return nil
 }
 
-func command commandMapb(c *config) error {
+func commandMapB(c *config) error {
+	url := ""
 
+	if c.Previous != "" {
+		url = c.Previous
+	} else {
+		return fmt.Errorf("You are on the first page")
+	}
+
+	res, err := http.Get(url)
+	if err != nil {
+		return fmt.Errorf("Failed to get data from PokeAPI")
+	}
+
+	body, err := io.ReadAll(res.Body)
+	defer res.Body.Close()
+	if res.StatusCode > 299 {
+		return fmt.Errorf("Response failed with status code %d", res.StatusCode)
+	}
+	if err != nil {
+		return fmt.Errorf("Failed to read response body")
+	}
+
+	var data locationArea
+	if err := json.Unmarshal(body, &data); err != nil {
+		return fmt.Errorf("Failed to unload JSON data") 
+	}
+
+	for _, area := range data.Results {
+		fmt.Println(area.Name)
+	}
+
+	if data.Previous != nil {
+		c.Previous = *data.Previous
+	} else {
+		c.Previous = ""
+	}
+
+	if data.Next != nil {
+		c.Next = *data.Next
+	} else {
+		c.Next = ""
+	}
+
+	return nil
 }
 
 func commandHelp(c *config) error {
