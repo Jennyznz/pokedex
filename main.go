@@ -4,12 +4,29 @@ import (
 	"fmt"
 	"bufio"
 	"os"
+	"net/http"
+	"io"
+	"encoding/json"
 )
 
 type cliCommand struct {
 	name string
 	description string
-	callback func() error
+	callback func(*config) error
+}
+
+type config struct {
+	Next string 
+	Previous string
+}
+
+type locationArea struct {
+	Next *string	`json:"next"`
+	Previous *string	`json:"previous"`
+	Results []struct {
+		Name string	`json:"name"`
+		URL string	`json:"url"`
+	}	`json:"results"`
 }
 
 var commands = map[string]cliCommand {
@@ -23,6 +40,11 @@ var commands = map[string]cliCommand {
 		description: "Displays available commands",
 		callback: commandHelp,
 	},
+	"map": {
+		name: "map",
+		description: "Displays (20) location areas in the Pokemon world",
+		callback: commandMap,
+	},
 }
 
 func main() {
@@ -30,6 +52,7 @@ func main() {
 	input := ""
 	cleaned := []string{}
 	command := ""
+	c := &config{} // An empty pointer to a config struct
 
 	for {
 		fmt.Printf("Pokedex > ")
@@ -39,7 +62,7 @@ func main() {
 			command = cleaned[0]
 			verifiedCommand, exists := commands[command]
 			if exists == true {
-				verifiedCommand.callback()
+				verifiedCommand.callback(c)
 			} else {
 				fmt.Println("Unknown command")
 			}
@@ -47,16 +70,65 @@ func main() {
 	}
 }
 
-func commandExit() error {
+func commandExit(c *config) error {
 	fmt.Println("Closing the Pokedex... Goodbye!")
 	os.Exit(0)
 	return nil
 }
 
-func commandHelp() error {
+func commandMap(c *config) error {
+	url := "https://pokeapi.co/api/v2/location-area"
+
+	if c.Next != "" {
+		url = c.Next
+	}
+
+	res, err := http.Get(url)
+	if err != nil {
+		return fmt.Errorf("Failed to get data from PokeAPI")
+	}
+	body, err := io.ReadAll(res.Body)
+	defer res.Body.Close()
+	if res.StatusCode > 299 {
+		return fmt.Errorf("Response failed with status code: %d", res.StatusCode)
+	}
+	if err != nil {
+		return fmt.Errorf("Failed to read response body")
+	}
+
+	var data locationArea
+	if err := json.Unmarshal(body, &data); err != nil {
+		return err
+	}
+
+	for _, area := range data.Results {
+		fmt.Println(area.Name)
+	}
+
+	if data.Previous != nil {
+		c.Previous = *data.Previous
+	} else {
+		c.Previous = ""
+	}
+
+	if data.Next != nil {
+		c.Next = *data.Next
+	} else {
+		c.Next = ""
+	}
+
+	return nil
+}
+
+func command commandMapb(c *config) error {
+
+}
+
+func commandHelp(c *config) error {
 	fmt.Println("Welcome to the Pokedex!")
 	fmt.Println("Usage: \n")
 	fmt.Println("help: Displays a help message")
 	fmt.Println("exit: Exit the Pokedex")
+	fmt.Println("map: Displays location areas in the Pokemon world")
 	return nil
 }
