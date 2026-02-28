@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"net/http"
 	"encoding/json"
 	"io"
 )
@@ -14,7 +13,7 @@ func commandMap(c *config) error {
 		url = c.Next
 	}
 
-	res, err := http.Get(url)
+	res, err := c.pokeapiClient.HttpClient.Get(url)
 	if err != nil {
 		return fmt.Errorf("Failed to get data from PokeAPI")
 	}
@@ -62,7 +61,7 @@ func commandMapB(c *config) error {
 		return fmt.Errorf("You are on the first page")
 	}
 
-	res, err := http.Get(url)
+	res, err := c.pokeapiClient.HttpClient.Get(url)
 	if err != nil {
 		return fmt.Errorf("Failed to get data from PokeAPI")
 	}

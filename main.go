@@ -4,6 +4,9 @@ import (
 	"fmt"
 	"bufio"
 	"os"
+	"github.com/Jennyznz/pokedex/internal/pokecache"
+	"github.com/Jennyznz/pokedex/internal/pokeapi"
+	"time"
 )
 
 func main() {
@@ -11,7 +14,11 @@ func main() {
 	input := ""
 	cleaned := []string{}
 	command := ""
-	c := &config{} // An empty pointer to a config struct
+	cache := pokecache.NewCache(5 * time.Second)
+	client := pokeapi.NewClient(cache)
+	c := &config{
+		pokeapiClient: client,
+	} 
 
 	for {
 		fmt.Printf("Pokedex > ")
@@ -28,3 +35,4 @@ func main() {
 		}
 	}
 }
+
