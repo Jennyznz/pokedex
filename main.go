@@ -27,8 +27,15 @@ func main() {
 			cleaned = cleanInput(input)
 			command = cleaned[0]
 			verifiedCommand, exists := commands[command]
+			
 			if exists == true {
-				verifiedCommand.callback(c)
+				if len(cleaned) == 1 {
+					// Zero parameter callbacks
+					verifiedCommand.callback(c)
+				} else {
+					argOne := cleaned[1]
+					verifiedCommand.callback(c, argOne)
+				}
 			} else {
 				fmt.Println("Unknown command")
 			}

@@ -6,25 +6,32 @@ import (
 	"io"
 )
 
-func commandMap(c *config) error {
+func commandMap(c *config, args ...string) error {
 	url := "https://pokeapi.co/api/v2/location-area"
 
 	if c.Next != "" {
 		url = c.Next
 	}
 
-	res, err := c.pokeapiClient.HttpClient.Get(url)
-	if err != nil {
-		return fmt.Errorf("Failed to get data from PokeAPI")
-	}
-
-	body, err := io.ReadAll(res.Body)
-	defer res.Body.Close()
-	if res.StatusCode > 299 {
-		return fmt.Errorf("Response failed with status code: %d", res.StatusCode)
-	}
-	if err != nil {
-		return fmt.Errorf("Failed to read response body")
+	var body []byte
+	// Check cache
+	val, ok := c.pokeapiClient.Cache.Get(url) 
+	if ok {
+		body = val
+	} else {
+		res, err := c.pokeapiClient.HttpClient.Get(url)
+		if err != nil {
+			return fmt.Errorf("Failed to get data from PokeAPI")
+		}
+		body, err = io.ReadAll(res.Body) 
+		if res.StatusCode > 299 {
+			return fmt.Errorf("Response failed with status code: %d", res.StatusCode)
+		}
+		if err != nil {
+			return fmt.Errorf("Failed to read response body")
+		}
+		defer res.Body.Close()	// Is function-scoped
+		c.pokeapiClient.Cache.Add(url, body)
 	}
 
 	var data locationArea
@@ -52,7 +59,7 @@ func commandMap(c *config) error {
 }
 
 
-func commandMapB(c *config) error {
+func commandMapB(c *config, args ...string) error {
 	url := ""
 
 	if c.Previous != "" {
@@ -61,18 +68,26 @@ func commandMapB(c *config) error {
 		return fmt.Errorf("You are on the first page")
 	}
 
-	res, err := c.pokeapiClient.HttpClient.Get(url)
-	if err != nil {
-		return fmt.Errorf("Failed to get data from PokeAPI")
-	}
+	var body []byte
+	// Check cache
+	val, ok := c.pokeapiClient.Cache.Get(url)
+	if ok {
+		body = val
+	} else {
+		res, err := c.pokeapiClient.HttpClient.Get(url)
+		if err != nil {
+			return fmt.Errorf("Failed to get data from PokeAPI")
+		}
 
-	body, err := io.ReadAll(res.Body)
-	defer res.Body.Close()
-	if res.StatusCode > 299 {
-		return fmt.Errorf("Response failed with status code %d", res.StatusCode)
-	}
-	if err != nil {
-		return fmt.Errorf("Failed to read response body")
+		body, err = io.ReadAll(res.Body)
+		if res.StatusCode > 299 {
+			return fmt.Errorf("Response failed with status code %d", res.StatusCode)
+		}
+		if err != nil {
+			return fmt.Errorf("Failed to read response body")
+		}
+		defer res.Body.Close()
+		c.pokeapiClient.Cache.Add(url, body)
 	}
 
 	var data locationArea
