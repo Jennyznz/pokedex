@@ -43,6 +43,11 @@ var commands = map[string]cliCommand {
 		description: "Lists all pokemon in the provided area.",
 		callback: commandExplore,
 	},
+	"catch": {
+		name: "catch",
+		description: "Gives player a chance to catch their chosen pokemon.",
+		callback: commandCatch,
+	},
 }
 
 func cleanInput(text string) []string {

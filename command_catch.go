@@ -2,14 +2,14 @@ package main
 
 import (
 	"fmt"
-	"encoding/json"
 	"io"
-	"strings"
+	"encoding/json"
+	"math/rand"
 )
 
-func commandExplore(c *config, args ...string) error {
-	url := "https://pokeapi.co/api/v2/location-area/" + args[0] + "/"
-	
+func commandCatch(c *config, args ...string) error {
+	url := "https://pokeapi.co/api/v2/ability/" + args[0] + "/"
+
 	var body []byte
 	val, ok := c.pokeapiClient.Cache.Get(url)
 	if ok {
@@ -24,23 +24,25 @@ func commandExplore(c *config, args ...string) error {
 		if err != nil {
 			return fmt.Errorf("Failed to read from response body")
 		}
-		
+
 		defer res.Body.Close()
 		c.pokeapiClient.Cache.Add(url, body)
 	}
 
-	var data location
-	if err := json.Unmarshal(body, &data); err != nil {
+	var thePokemon pokemon
+	if err := json.Unmarshal(body, &thePokemon); err != nil {
 		return fmt.Errorf("Failed to unload JSON data")
 	}
 
-	fmt.Printf("Exploring %s...\n", strings.ToLower(args[0]))
-	fmt.Println("Found Pokemon: ")
+	fmt.Printf("\nThrowing a Pokeball at %s...", args[0])
 
-	for _, encounter := range data.PokemonEncounters {
-		fmt.Println(" - " + encounter.Pokemon.Name)
+	const avgBaseExp = 200
+	randVal := rand.Intn(thePokemon.BaseExperience)
+	if randVal < avgBaseExp {
+		fmt.Println("%s was caught!", args[0])
+	} else {
+		fmt.Println("%s escaped!", args[0])
 	}
 
 	return nil
 }
-
