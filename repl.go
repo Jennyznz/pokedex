@@ -46,8 +46,13 @@ var commands = map[string]cliCommand {
 	},
 	"catch": {
 		name: "catch",
-		description: "Gives player a chance to catch their chosen pokemon.",
+		description: "Gives player a chance to catch their chosen Pokemon.",
 		callback: commandCatch,
+	},
+	"inspect": {
+		name: "inspect",
+		description: "Prints the name, height, weight, stats and type(s) of a captured Pokemon.",
+		callback: commandInspect,
 	},
 }
 

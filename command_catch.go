@@ -34,7 +34,7 @@ func commandCatch(c *config, args ...string) error {
 		return fmt.Errorf("Failed to unload JSON data")
 	}
 
-	fmt.Printf("\nThrowing a Pokeball at %s...", args[0])
+	fmt.Printf("Throwing a Pokeball at %s...", args[0])
 
 	const avgBaseExp = 200
 	randVal := rand.Intn(thePokemon.BaseExperience)
