@@ -18,6 +18,7 @@ func main() {
 	client := pokeapi.NewClient(cache)
 	c := &config{
 		pokeapiClient: client,
+		pokedex: make(map[string]pokemon),
 	} 
 
 	for {

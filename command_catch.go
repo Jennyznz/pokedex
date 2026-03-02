@@ -8,7 +8,7 @@ import (
 )
 
 func commandCatch(c *config, args ...string) error {
-	url := "https://pokeapi.co/api/v2/ability/" + args[0] + "/"
+	url := "https://pokeapi.co/api/v2/pokemon/" + args[0] + "/"
 
 	var body []byte
 	val, ok := c.pokeapiClient.Cache.Get(url)
@@ -39,9 +39,10 @@ func commandCatch(c *config, args ...string) error {
 	const avgBaseExp = 200
 	randVal := rand.Intn(thePokemon.BaseExperience)
 	if randVal < avgBaseExp {
-		fmt.Println("%s was caught!", args[0])
+		fmt.Printf("\n%s was caught!\n", args[0])
+		c.pokedex[args[0]] = thePokemon
 	} else {
-		fmt.Println("%s escaped!", args[0])
+		fmt.Printf("\n%s escaped!\n", args[0])
 	}
 
 	return nil

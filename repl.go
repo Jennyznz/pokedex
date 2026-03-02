@@ -13,6 +13,7 @@ type cliCommand struct {
 
 type config struct {
 	pokeapiClient pokeapi.Client
+	pokedex map[string]pokemon
 	Next string 
 	Previous string
 }
