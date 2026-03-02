@@ -54,6 +54,11 @@ var commands = map[string]cliCommand {
 		description: "Prints the name, height, weight, stats and type(s) of a captured Pokemon.",
 		callback: commandInspect,
 	},
+	"pokedex": {
+		name: "pokedex",
+		description: "Prints name of pokemons currently in the Pokedex.",
+		callback: commandPokedex,
+	},
 }
 
 func cleanInput(text string) []string {
